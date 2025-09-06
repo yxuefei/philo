@@ -1,9 +1,9 @@
-CC      = cc
-CFLAGS  = -Wall -Wextra -Werror -pthread
+CC		= cc
+CFLAGS	= -Wall -Wextra -Werror -pthread
 
-NAME    = philo
-SRCS    = main.c utils.c actions.c monitor.c
-OBJS    = $(SRCS:.c=.o)
+NAME	= philo
+SRCS	= main.c parse_args.c init.c utils_time.c actions.c monitor.c utils.c
+OBJS	= $(SRCS:.c=.o)
 
 all: $(NAME)
 
