@@ -6,7 +6,7 @@
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/06 16:41:20 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/06 16:45:19 by xueyang          ###   ########.fr       */
+/*   Updated: 2025/09/06 17:41:25 by xueyang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,24 +14,25 @@
 
 static void	take_forks(t_philo *p)
 {
-	t_rules	*r;
+	int f1;
+	int f2;
 
-	r = p->rules;
-	if (p->id % 2 == 0)
+	if (p->left < p->right)
 	{
-		pthread_mutex_lock(&r->forks[p->right].mtx);
-		log_status(p, ACT_FORK);
-		pthread_mutex_lock(&r->forks[p->left].mtx);
-		log_status(p, ACT_FORK);
+		f1 = p->left;
+		f2 = p->right;
 	}
 	else
 	{
-		pthread_mutex_lock(&r->forks[p->left].mtx);
-		log_status(p, ACT_FORK);
-		pthread_mutex_lock(&r->forks[p->right].mtx);
-		log_status(p, ACT_FORK);
+		f1 = p->right;
+		f2 = p->left;
 	}
+	pthread_mutex_lock(&p->rules->forks[f1].mtx);
+	log_status(p, ACT_FORK);
+	pthread_mutex_lock(&p->rules->forks[f2].mtx);
+	log_status(p, ACT_FORK);
 }
+
 
 static void	put_forks(t_philo *p)
 {
@@ -86,14 +87,13 @@ void	*philo_routine(void *arg)
 	t_philo	*p;
 
 	p = (t_philo *)arg;
-	if (p->rules->n_philo == 1)
-		return (run_single(p), NULL);
 	msleep_until(p->rules->start_ms);
 	if (p->id % 2 == 0)
 		usleep(200);
-	pthread_mutex_lock(&p->rules->state_mtx);
-	p->last_meal_ms = p->rules->start_ms;
-	pthread_mutex_unlock(&p->rules->state_mtx);
+	if (p->rules->n_philo == 1)
+		return (run_single(p), NULL);
+	if (p->rules->n_philo > 1 && (p->id % 2 == 0))
+		msleep(p->rules->t_eat / 2);
 	while (!get_stop(p->rules))
 	{
 		take_forks(p);

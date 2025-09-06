@@ -6,7 +6,7 @@
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 10:47:02 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/06 16:45:21 by xueyang          ###   ########.fr       */
+/*   Updated: 2025/09/06 17:14:13 by xueyang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,15 @@ static int	start_threads(t_rules *r)
 	int	i;
 
 	r->start_ms = now_ms() + 50;
+	pthread_mutex_lock(&r->state_mtx);
+	i = 0;
+	while (i < r->n_philo)
+	{
+		r->philos[i].last_meal_ms = r->start_ms;
+		r->philos[i].meals = 0;
+		i++;
+	}
+	pthread_mutex_unlock(&r->state_mtx);
 	i = 0;
 	while (i < r->n_philo)
 	{
@@ -35,6 +44,7 @@ static int	start_threads(t_rules *r)
 		return (set_stop(r, 1), 1);
 	return (0);
 }
+
 
 static void	join_threads(t_rules *r)
 {
