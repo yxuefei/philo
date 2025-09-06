@@ -6,85 +6,105 @@
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 10:51:06 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/04 15:56:21 by xueyang          ###   ########.fr       */
+/*   Updated: 2025/09/06 16:33:59 by xueyang          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo.h                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: you <you@student.42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/06 15:00:00 by you               #+#    #+#             */
+/*   Updated: 2025/09/06 15:00:00 by you              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PHILO_H
 # define PHILO_H
 
-# include <stdio.h>
 # include <stdlib.h>
 # include <unistd.h>
-# include <pthread.h>
-# include <sys/time.h>
-# include <string.h>
+# include <stdio.h>
 # include <limits.h>
-# include <stdbool.h>
-# include <semaphore.h>
-# include <fcntl.h>
-# include <signal.h>
-# include <sys/wait.h>
-# include <errno.h>
-# include <time.h>
-# include <stdatomic.h>
-# include <stdint.h>
-# include <sys/types.h>
-# include <sys/stat.h>
-# include <sys/mman.h>
-# include <sched.h>
-# include <sys/resource.h>
-# include <sys/syscall.h>
+# include <sys/time.h>
+# include <pthread.h>
 
+typedef long long       t_ms;
 
-typedef struct s_data
+typedef enum e_act
 {
-    int				num_of_philos;
-    int				time_to_die;
-    int				time_to_eat;
-    int				time_to_sleep;
-    int				num_of_times_each_philo_must_eat;
-    atomic_bool		someone_died;
-    atomic_int		finished_eating_count;
-    atomic_long		start_time;
-    sem_t			*forks;
-    sem_t			*print_lock;
-    pid_t			*philo_pids;
-}	t_data;
+    ACT_FORK,
+    ACT_EAT,
+    ACT_SLEEP,
+    ACT_THINK,
+    ACT_DIED
+}   t_act;
+
+struct s_rules;
+
+typedef struct s_fork
+{
+    pthread_mutex_t     mtx;
+}   t_fork;
 
 typedef struct s_philo
 {
-    int				id;
-    atomic_long		last_meal_time;
-    int				times_eaten;
-    t_data			*data;
-}	t_philo;
+    int                 id;
+    int                 left;
+    int                 right;
+    int                 meals;
+    t_ms                last_meal_ms;
+    pthread_t           thread;
+    struct s_rules      *rules;
+}   t_philo;
 
-long		get_time_in_ms(void);
-void		ft_usleep(int milliseconds);
-void		print_action(t_philo *philo, const char *action);
-int			ft_atoi(const char *str);
-void		cleanup(t_data *data, t_philo *philos);
-int			init_data(t_data *data, int argc, char **argv);
-int			init_philos(t_data *data, t_philo **philos);
-void		*philo_routine(void *arg);
-void		*monitor_routine(void *arg);
-int			start_simulation(t_data *data, t_philo *philos);
-void		terminate_processes(t_data *data);
-int			is_number(const char *str);
-void		free_resources(t_data *data, t_philo *philos);
-int			error_and_cleanup(t_data *data, t_philo *philos, const char *msg);
-int			check_overflow(const char *str);
-int			validate_arguments(int argc, char **argv);
-int			ft_strcmp(const char *s1, const char *s2);
-int			ft_strlen(const char *str);
-int			ft_isdigit(int c);
-int			ft_iswhitespace(int c);
-char		*ft_strtrim(const char *s1, const char *set);
-char		*ft_strdup(const char *s1);
-char		*ft_substr(const char *s, unsigned int start, size_t len);
-char		*ft_strjoin(const char *s1, const char *s2);
-char		**ft_split(const char *s, char c);
+typedef struct s_rules
+{
+    int                 n_philo;
+    t_ms                t_die;
+    t_ms                t_eat;
+    t_ms                t_sleep;
+    int                 must_eat;
 
+    t_ms                start_ms;
+    int                 stop;
+    int                 finished;
+
+    t_fork              *forks;
+    pthread_mutex_t     print_mtx;
+    pthread_mutex_t     state_mtx;
+
+    t_philo             *philos;
+    pthread_t           monitor;
+}   t_rules;
+
+/* parsing / init / destroy */
+int     parse_args(int argc, char **argv, t_rules *r);
+int     init_rules(t_rules *r);
+int     init_entities(t_rules *r);
+void    destroy_all(t_rules *r);
+
+/* time helpers */
+t_ms    now_ms(void);
+t_ms    elapsed_ms(t_ms since);
+void    msleep_until(t_ms target_ms);
+void    msleep(t_ms ms);
+
+/* state / logging */
+int     get_stop(t_rules *r);
+void    set_stop(t_rules *r, int v);
+int     log_status(t_philo *p, t_act act);
+
+/* routines */
+void    *philo_routine(void *arg);
+void    *monitor_routine(void *arg);
+
+/* utils */
+int     ft_atoi_strict(const char *s, int *out);
+int     min_int(int a, int b);
+int     max_int(int a, int b);
 
 #endif

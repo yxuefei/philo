@@ -6,54 +6,78 @@
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 10:47:02 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/04 15:56:23 by xueyang          ###   ########.fr       */
+/*   Updated: 2025/09/06 16:33:55 by xueyang          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: you <you@student.42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/09/06 15:05:00 by you               #+#    #+#             */
+/*   Updated: 2025/09/06 15:05:00 by you              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-t_data	*init_data(t_data *data, int argc, char **argv)
+static void	print_usage(void)
 {
-	data->num_of_philos = atoi(argv[1]);
-	data->time_to_die = atoi(argv[2]);
-	data->time_to_eat = atoi(argv[3]);
-	data->time_to_sleep = atoi(argv[4]);
-	if (argc == 6)
-		data->num_of_times_each_philo_must_eat = atoi(argv[5]);
-	else
-		data->num_of_times_each_philo_must_eat = -1;
-	atomic_store(&data->someone_died, false);
-	atomic_store(&data->finished_eating_count, 0);
-	atomic_store(&data->start_time, get_time_in_ms());
-	data->forks = sem_open("/forks_sem", O_CREAT, 0644, data->num_of_philos);
-	data->print_lock = sem_open("/print_lock_sem", O_CREAT, 0644, 1);
-	data->philo_pids = malloc(sizeof(pid_t) * data->num_of_philos);
-	if (!data->forks || !data->print_lock || !data->philo_pids)
-	{
-		printf("Error: Semaphore or memory allocation failed\n");
-		exit(1);
-	}
-	return (data);
+	write(2, "Usage: ./philo n t_die t_eat t_sleep ", 38);
+	write(2, "[must_eat]\n", 11);
 }
 
-void	cleanup(t_data *data)
+static int	start_threads(t_rules *r)
 {
-	sem_close(data->forks);
-	sem_unlink("/forks_sem");
-	sem_close(data->print_lock);
-	sem_unlink("/print_lock_sem");
-	free(data->philo_pids);
+	int	i;
+
+	r->start_ms = now_ms() + 50;
+	i = 0;
+	while (i < r->n_philo)
+	{
+		if (pthread_create(&r->philos[i].thread, NULL, \
+				philo_routine, &r->philos[i]) != 0)
+			return (set_stop(r, 1), 1);
+		i++;
+	}
+	if (pthread_create(&r->monitor, NULL, monitor_routine, r) != 0)
+		return (set_stop(r, 1), 1);
+	return (0);
+}
+
+static void	join_threads(t_rules *r)
+{
+	int	i;
+
+	i = 0;
+	while (i < r->n_philo)
+	{
+		pthread_join(r->philos[i].thread, NULL);
+		i++;
+	}
+	pthread_join(r->monitor, NULL);
 }
 
 int	main(int argc, char **argv)
 {
-	t_data	*data;
+	t_rules	r;
 
-	if (argc < 5)
+	if (parse_args(argc, argv, &r) != 0)
+		return (print_usage(), 1);
+	if (init_rules(&r) != 0)
+		return (write(2, "init_rules failed\n", 18), 1);
+	if (init_entities(&r) != 0)
+		return (destroy_all(&r), write(2, "init_entities failed\n", 21), 1);
+	if (start_threads(&r) != 0)
 	{
-		printf("Error: Not enough arguments\n");
-		return (1);
+		join_threads(&r);
+		destroy_all(&r);
+		return (write(2, "thread start failed\n", 20), 1);
 	}
-	data = init_data(&data, argc, argv);
+	join_threads(&r);
+	destroy_all(&r);
 	return (0);
 }
