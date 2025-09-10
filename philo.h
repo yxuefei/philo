@@ -6,7 +6,7 @@
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 10:51:06 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/10 19:48:55 by xueyang          ###   ########.fr       */
+/*   Updated: 2025/09/10 21:56:15 by xueyang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,87 +19,63 @@
 # include <limits.h>
 # include <sys/time.h>
 # include <pthread.h>
+# include <stdbool.h>
 
-typedef long long       t_ms;
-
-typedef enum e_act
-{
-    ACT_FORK,
-    ACT_EAT,
-    ACT_SLEEP,
-    ACT_THINK,
-    ACT_DIED
-}   t_act;
-
-struct s_rules;
-
-typedef struct s_fork
-{
-    pthread_mutex_t     mtx;
-}   t_fork;
+# define MAX_CASE 250
 
 typedef struct s_philo
 {
-    int                 id;
-    int                 left;
-    int                 right;
-    int                 meals;
-    t_ms                last_meal_ms;
-    pthread_t           thread;
-    struct s_rules      *rules;
-    int                 eating;
+	pthread_t		thread;
+	int				phi_id;
+	int				eating;
+	int				meal_nbr;
+	int				min_meal;
+	int				phi_nbr;
+	int				*dead_flg;
+	size_t			last_meal_time;
+	size_t			time_die;
+	size_t			time_eat;
+	size_t			time_sleep;
+	size_t			start_time;
+	pthread_mutex_t	*r_fork;
+	pthread_mutex_t	*l_fork;
+	pthread_mutex_t	*dead_mtx;
+	pthread_mutex_t	*meal_mtx;
+	pthread_mutex_t	*print_mtx;
 }   t_philo;
 
-typedef struct s_rules
+typedef struct s_data
 {
-    int                 n_philo;
-    t_ms                t_die;
-    t_ms                t_eat;
-    t_ms                t_sleep;
-    int                 must_eat;
+	int				dead_flg;
+	t_philo			*philo;
+	pthread_mutex_t	meal_mtx;
+	pthread_mutex_t	print_mtx;
+	pthread_mutex_t	dead_mtx;
+}   t_data;
 
-    t_ms                start_ms;
-    int                 stop;
-    int                 finished;
-
-    t_fork              *forks;
-    pthread_mutex_t     print_mtx;
-    pthread_mutex_t     state_mtx;
-
-    t_philo             *philos;
-    pthread_t           monitor;
-	
-    int					slots;
-}   t_rules;
-
-/* parsing / init / destroy */
-int     parse_args(int argc, char **argv, t_rules *r);
-int     init_rules(t_rules *r);
-int     init_entities(t_rules *r);
-void    destroy_all(t_rules *r);
-
-/* time helpers */
-t_ms    now_ms(void);
-t_ms    elapsed_ms(t_ms since);
-void    msleep_until(t_ms target_ms);
-void    msleep(t_ms ms);
-
-/* state / logging */
-int     get_stop(t_rules *r);
-void    set_stop(t_rules *r, int v);
-int     log_status(t_philo *p, t_act act);
-
-/* routines */
-void    *philo_routine(void *arg);
-void    *monitor_routine(void *arg);
-
-/* utils */
-int     ft_atoi_strict(const char *s, int *out);
-int     min_int(int a, int b);
-int     max_int(int a, int b);
-
-void	acquire_slot(t_rules *r);
-void	release_slot(t_rules *r);
-void	msleep_intr(t_rules *r, t_ms ms);
+void	parsing(t_philo *philo, char **av);
+void	data_init(t_philo *philo, t_data *data, pthread_mutex_t *forks,
+		char **av);
+void	lock_init(t_philo *philo, t_data *data);
+void	fork_init(pthread_mutex_t *forks, int phi_nbr);
+size_t	ft_gettime(void);
+int		ft_create_thread(t_data *data, pthread_mutex_t *forks);
+void	*ft_thread_behav(void *val);
+void	*ft_monitor(void *val);
+int		ft_dead(t_philo *philo);
+int		ft_finish(t_philo *philo);
+int		check_all_died(t_philo *philo);
+int		reach_min_meal(t_philo *philo);
+void	ft_print_behav(int phi_id, char *s, t_philo *philo);
+void	ft_one_eat(t_philo *philo);
+void	ft_eat(t_philo *philo);
+void	ft_sleep(t_philo *philo);
+void	ft_think(t_philo *philo);
+int		ft_check_digit(char **av);
+void	check_valid(char **av);
+void	ft_error(char *s);
+void	ft_clean(t_data *data, pthread_mutex_t *forks);
+int		ft_atoi(char *s);
+int		ft_usleep(size_t tm);
 
 #endif

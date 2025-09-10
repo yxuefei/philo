@@ -6,97 +6,56 @@
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/06 16:37:09 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/10 20:03:07 by xueyang          ###   ########.fr       */
+/*   Updated: 2025/09/10 21:52:57 by xueyang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-static int	init_mutexes(t_rules *r)
-{
-	int	i;
-
-	if (pthread_mutex_init(&r->print_mtx, NULL) != 0)
-		return (1);
-	if (pthread_mutex_init(&r->state_mtx, NULL) != 0)
-		return (pthread_mutex_destroy(&r->print_mtx), 1);
-	i = 0;
-	while (i < r->n_philo)
-	{
-		if (pthread_mutex_init(&r->forks[i].mtx, NULL) != 0)
-		{
-			while (--i >= 0)
-				pthread_mutex_destroy(&r->forks[i].mtx);
-			pthread_mutex_destroy(&r->state_mtx);
-			pthread_mutex_destroy(&r->print_mtx);
-			return (1);
-		}
-		i++;
-	}
-	return (0);
-}
-
-int	init_rules(t_rules *r)
-{
-	r->forks = (t_fork *)malloc(sizeof(t_fork) * r->n_philo);
-	if (!r->forks)
-		return (1);
-	r->philos = (t_philo *)malloc(sizeof(t_philo) * r->n_philo);
-	if (!r->philos)
-		return (free(r->forks), r->forks = NULL, 1);
-	if (init_mutexes(r))
-		return (free(r->philos), free(r->forks), r->philos = NULL, \
-			r->forks = NULL, 1);
-    /*
-     * To ensure progress without risking deadlock, gate the number of
-     * philosophers that may attempt to pick up forks to N-1 for any N >= 2.
-     * Using N/2 for large N can cause unnecessary starvation under tight
-     * t_die constraints because threads queue for the slot before eating.
-     */
-	if (r->n_philo == 1)
-		r->slots = 1;
-	else if (r->n_philo > 100)
-		r->slots = r->n_philo / 2;
-	else
-		r->slots = r->n_philo - 1;
-    return (0);
-}
-
-int	init_entities(t_rules *r)
+void	data_init(t_philo *philo, t_data *data, pthread_mutex_t *forks,
+		char **av)
 {
 	int	i;
 
 	i = 0;
-	while (i < r->n_philo)
+	while (i < ft_atoi(av[1]))
 	{
-		r->philos[i].id = i + 1;
-		r->philos[i].left = i;
-		r->philos[i].right = (i + 1) % r->n_philo;
-		r->philos[i].meals = 0;
-		r->philos[i].last_meal_ms = 0;
-		r->philos[i].rules = r;
-		r->philos[i].eating = 0;
+		philo[i].phi_id = i + 1;
+		philo[i].eating = 0;
+		philo[i].meal_nbr = 0;
+		parsing(&philo[i], av);
+		philo[i].start_time = ft_gettime();
+		philo[i].last_meal_time = ft_gettime();
+		philo[i].print_mtx = &data->print_mtx;
+		philo[i].meal_mtx = &data->meal_mtx;
+		philo[i].dead_mtx = &data->dead_mtx;
+		philo[i].dead_flg = &data->dead_flg;
+		philo[i].l_fork = &forks[i];
+		if (i == 0)
+			philo[i].r_fork = &forks[philo[i].phi_nbr - 1];
+		else
+			philo[i].r_fork = &forks[i - 1];
 		i++;
 	}
-	return (0);
 }
 
-void	destroy_all(t_rules *r)
+void	fork_init(pthread_mutex_t *forks, int phi_nbr)
 {
 	int	i;
 
-	if (!r)
-		return ;
-	if (r->forks)
+	i = 0;
+	while (i < phi_nbr)
 	{
-		i = 0;
-		while (i < r->n_philo)
-			pthread_mutex_destroy(&r->forks[i++].mtx);
+		pthread_mutex_init(&forks[i], NULL);
+		i++;
 	}
-	pthread_mutex_destroy(&r->state_mtx);
-	pthread_mutex_destroy(&r->print_mtx);
-	free(r->philos);
-	free(r->forks);
-	r->philos = NULL;
-	r->forks = NULL;
+}
+
+void	lock_init(t_philo *philo, t_data *data)
+{
+	data->dead_flg = 0;
+	data->philo = philo;
+	pthread_mutex_init(&data->dead_mtx, NULL);
+	pthread_mutex_init(&data->meal_mtx, NULL);
+	pthread_mutex_init(&data->print_mtx, NULL);
 }

@@ -6,76 +6,73 @@
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 10:47:02 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/10 14:21:39 by xueyang          ###   ########.fr       */
+/*   Updated: 2025/09/10 21:53:27 by xueyang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-static void	print_usage(void)
+int	ft_create_thread(t_data *data, pthread_mutex_t *forks)
 {
-	write(2, "Usage: ./philo n t_die t_eat t_sleep ", 38);
-	write(2, "[must_eat]\n", 11);
-}
+	int			i;
+	pthread_t	monitor;
 
-static int	start_threads(t_rules *r)
-{
-	int	i;
-
-	r->start_ms = now_ms() + 50;
-	pthread_mutex_lock(&r->state_mtx);
+	if (pthread_create(&monitor, NULL, &ft_monitor, data->philo) != 0)
+		ft_clean(data, forks);
 	i = 0;
-	while (i < r->n_philo)
+	while (i < data->philo[0].phi_nbr)
 	{
-		r->philos[i].last_meal_ms = r->start_ms;
-		r->philos[i].meals = 0;
+		if (pthread_create(&data->philo[i].thread, NULL, &ft_thread_behav,
+				&data->philo[i]) != 0)
+			ft_clean(data, forks);
 		i++;
 	}
-	pthread_mutex_unlock(&r->state_mtx);
 	i = 0;
-	while (i < r->n_philo)
+	if (pthread_join(monitor, NULL) != 0)
+		ft_clean(data, forks);
+	while (i < data->philo[0].phi_nbr)
 	{
-		if (pthread_create(&r->philos[i].thread, NULL, \
-				philo_routine, &r->philos[i]) != 0)
-			return (set_stop(r, 1), 1);
+		if (pthread_join(data->philo[i].thread, NULL) != 0)
+			ft_clean(data, forks);
 		i++;
 	}
-	if (pthread_create(&r->monitor, NULL, monitor_routine, r) != 0)
-		return (set_stop(r, 1), 1);
 	return (0);
 }
 
-
-static void	join_threads(t_rules *r)
+void	*ft_thread_behav(void *val)
 {
-	int	i;
+	t_philo	*philo;
 
-	i = 0;
-	while (i < r->n_philo)
+	philo = (t_philo *)val;
+	if (philo->phi_id % 2 == 0)
+		ft_usleep(1);
+	while (!ft_finish(philo))
 	{
-		pthread_join(r->philos[i].thread, NULL);
-		i++;
+		if (philo->phi_nbr == 1)
+			ft_one_eat(philo);
+		else
+			ft_eat(philo);
+		ft_sleep(philo);
+		ft_think(philo);
 	}
-	pthread_join(r->monitor, NULL);
+	return (val);
 }
 
-int	main(int argc, char **argv)
+int	main(int ac, char **av)
 {
-	t_rules	r;
+	t_philo			philo[MAX_CASE];
+	t_data			data;
+	pthread_mutex_t	forks[MAX_CASE];
 
-	if (parse_args(argc, argv, &r) != 0)
-		return (print_usage(), 1);
-	if (init_rules(&r) != 0)
-		return (write(2, "init_rules failed\n", 18), 1);
-	if (init_entities(&r) != 0)
-		return (destroy_all(&r), write(2, "init_entities failed\n", 21), 1);
-	if (start_threads(&r) != 0)
-	{
-		join_threads(&r);
-		destroy_all(&r);
-		return (write(2, "thread start failed\n", 20), 1);
-	}
-	join_threads(&r);
-	destroy_all(&r);
+	if (ac != 5 && ac != 6)
+		ft_error("Invalid number of parameter.\n");
+	if (ft_check_digit(av))
+		ft_error("Input should be positive digits.\n");
+	check_valid(av);
+	lock_init(philo, &data);
+	fork_init(forks, ft_atoi(av[1]));
+	data_init(philo, &data, forks, av);
+	ft_create_thread(&data, forks);
+	ft_clean(&data, forks);
 	return (0);
 }

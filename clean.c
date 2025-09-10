@@ -1,25 +1,34 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parse_args.c                                       :+:      :+:    :+:   */
+/*   clean.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/09/06 16:36:02 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/10 21:43:00 by xueyang          ###   ########.fr       */
+/*   Created: 2025/09/10 21:48:17 by xueyang           #+#    #+#             */
+/*   Updated: 2025/09/10 21:48:34 by xueyang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	parsing(t_philo *philo, char **av)
+void	ft_error(char *s)
 {
-	philo->phi_nbr = ft_atoi(av[1]);
-	philo->time_die = ft_atoi(av[2]);
-	philo->time_eat = ft_atoi(av[3]);
-	philo->time_sleep = ft_atoi(av[4]);
-	if (av[5])
-		philo->min_meal = ft_atoi(av[5]);
-	else
-		philo->min_meal = -1;
+	printf("%s", s);
+	exit(EXIT_FAILURE);
+}
+
+void	ft_clean(t_data *data, pthread_mutex_t *forks)
+{
+	int	i;
+
+	i = 0;
+	pthread_mutex_destroy(&data->dead_mtx);
+	pthread_mutex_destroy(&data->print_mtx);
+	pthread_mutex_destroy(&data->meal_mtx);
+	while (i < data->philo->phi_nbr)
+	{
+		pthread_mutex_destroy(&forks[i]);
+		i++;
+	}
 }
