@@ -6,7 +6,7 @@
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/06 16:41:20 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/10 19:50:21 by xueyang          ###   ########.fr       */
+/*   Updated: 2025/09/10 20:02:40 by xueyang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -151,7 +151,7 @@ void    *philo_routine(void *arg)
         return (run_single(p), NULL);
     /* stagger start as before */
     if (p->id % 2 == 1)
-        msleep_intr(r, r->t_eat);
+        usleep(1000);
 
     while (!get_stop(r))
     {
@@ -170,11 +170,13 @@ void    *philo_routine(void *arg)
         if (get_stop(r))
         {
             pthread_mutex_unlock(&r->forks[first].mtx);
+            release_slot(r);
             break ;
         }
         if (!log_status(p, ACT_FORK)) /* print and also early check */
         {
             pthread_mutex_unlock(&r->forks[first].mtx);
+            release_slot(r);
             break ;
         }
 
@@ -183,12 +185,14 @@ void    *philo_routine(void *arg)
         {
             pthread_mutex_unlock(&r->forks[second].mtx);
             pthread_mutex_unlock(&r->forks[first].mtx);
+            release_slot(r);
             break ;
         }
         if (!log_status(p, ACT_FORK))
         {
             pthread_mutex_unlock(&r->forks[second].mtx);
             pthread_mutex_unlock(&r->forks[first].mtx);
+            release_slot(r);
             break ;
         }
 

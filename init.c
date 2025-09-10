@@ -6,7 +6,7 @@
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/06 16:37:09 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/10 19:49:30 by xueyang          ###   ########.fr       */
+/*   Updated: 2025/09/10 20:03:07 by xueyang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,10 +53,12 @@ int	init_rules(t_rules *r)
      * Using N/2 for large N can cause unnecessary starvation under tight
      * t_die constraints because threads queue for the slot before eating.
      */
-    if (r->n_philo == 1)
-        r->slots = 1;
-    else
-        r->slots = r->n_philo - 1;
+	if (r->n_philo == 1)
+		r->slots = 1;
+	else if (r->n_philo > 100)
+		r->slots = r->n_philo / 2;
+	else
+		r->slots = r->n_philo - 1;
     return (0);
 }
 
