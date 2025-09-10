@@ -6,7 +6,7 @@
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 10:51:06 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/06 16:35:38 by xueyang          ###   ########.fr       */
+/*   Updated: 2025/09/10 13:01:56 by xueyang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,8 @@ typedef struct s_rules
 
     t_philo             *philos;
     pthread_t           monitor;
+	
+    int					slots;
 }   t_rules;
 
 /* parsing / init / destroy */
@@ -94,5 +96,9 @@ void    *monitor_routine(void *arg);
 int     ft_atoi_strict(const char *s, int *out);
 int     min_int(int a, int b);
 int     max_int(int a, int b);
+
+void	acquire_slot(t_rules *r);
+void	release_slot(t_rules *r);
+void	msleep_intr(t_rules *r, t_ms ms);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/06 16:37:09 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/06 16:45:16 by xueyang          ###   ########.fr       */
+/*   Updated: 2025/09/10 13:45:33 by xueyang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,17 @@ int	init_rules(t_rules *r)
 	if (init_mutexes(r))
 		return (free(r->philos), free(r->forks), r->philos = NULL, \
 			r->forks = NULL, 1);
-	return (0);
+    /*
+     * To ensure progress without risking deadlock, gate the number of
+     * philosophers that may attempt to pick up forks to N-1 for any N >= 2.
+     * Using N/2 for large N can cause unnecessary starvation under tight
+     * t_die constraints because threads queue for the slot before eating.
+     */
+    if (r->n_philo == 1)
+        r->slots = 1;
+    else
+        r->slots = r->n_philo - 1;
+    return (0);
 }
 
 int	init_entities(t_rules *r)

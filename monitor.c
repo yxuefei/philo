@@ -6,7 +6,7 @@
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/06 16:40:00 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/06 17:39:33 by xueyang          ###   ########.fr       */
+/*   Updated: 2025/09/10 17:24:28 by xueyang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ static int	check_death(t_rules *r, int i)
 			pthread_mutex_unlock(&r->state_mtx);
 		}
 		pthread_mutex_unlock(&r->print_mtx);
+		_exit(0);
 		return (1);
 	}
 	return (0);
@@ -70,7 +71,7 @@ void	*monitor_routine(void *arg)
 				return (NULL);
 			i++;
 		}
-		usleep(500);
+		usleep(1000);
 	}
 	return (NULL);
 }
