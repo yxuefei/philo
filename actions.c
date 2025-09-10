@@ -6,7 +6,7 @@
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/06 16:41:20 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/10 16:39:09 by xueyang          ###   ########.fr       */
+/*   Updated: 2025/09/10 19:50:21 by xueyang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@
 static void	mark_meal(t_philo *p)
 {
 	pthread_mutex_lock(&p->rules->state_mtx);
+    p->eating = 1;
 	p->last_meal_ms = now_ms();
 	pthread_mutex_unlock(&p->rules->state_mtx);
 }
@@ -51,6 +52,7 @@ static void	count_meal(t_philo *p)
 {
 	pthread_mutex_lock(&p->rules->state_mtx);
 	p->meals += 1;
+    p->eating = 0;
 	if (p->rules->must_eat != -1 && p->meals == p->rules->must_eat)
 		p->rules->finished += 1;
 	pthread_mutex_unlock(&p->rules->state_mtx);
@@ -71,8 +73,6 @@ static void	do_sleep_think(t_philo *p)
 		return ;
 	msleep_intr(p->rules, p->rules->t_sleep);
 	log_status(p, ACT_THINK);
-    // msleep_intr(p->rules, p->rules->t_eat);
-    // msleep_intr(p->rules, p->rules->t_eat);
 }
 
 static void	run_single(t_philo *p)
@@ -155,14 +155,16 @@ void    *philo_routine(void *arg)
 
     while (!get_stop(r))
     {
+        acquire_slot(r);
         if (get_stop(r))
-            break ;
+        {
+            release_slot(r);
+            break;
+        }
 
-        /* decide order (left/right) but DO NOT lock forks yet */
         first  = (p->id % 2) ? p->left  : p->right;
         second = (p->id % 2) ? p->right : p->left;
 
-        /* ---- Try to take both forks safely (odd/even order) ---- */
         pthread_mutex_lock(&r->forks[first].mtx);
         /* if stop was set while acquiring, clean up */
         if (get_stop(r))
@@ -190,17 +192,12 @@ void    *philo_routine(void *arg)
             break ;
         }
 
-        /* ---- EAT ---- */
         do_eat(p);
-
-        /* ---- PUT FORKS ---- */
         pthread_mutex_unlock(&r->forks[first].mtx);
         pthread_mutex_unlock(&r->forks[second].mtx);
-
-        /* ---- SLEEP / THINK ---- */
+        release_slot(r);
         do_sleep_think(p);
 
-        /* small backoff to avoid busy-spin */
         usleep(80);
     }
     return (NULL);

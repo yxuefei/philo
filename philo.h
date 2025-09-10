@@ -6,7 +6,7 @@
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 10:51:06 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/10 13:01:56 by xueyang          ###   ########.fr       */
+/*   Updated: 2025/09/10 19:48:55 by xueyang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,7 @@ typedef struct s_philo
     t_ms                last_meal_ms;
     pthread_t           thread;
     struct s_rules      *rules;
+    int                 eating;
 }   t_philo;
 
 typedef struct s_rules

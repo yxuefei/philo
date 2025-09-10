@@ -6,7 +6,7 @@
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/06 16:40:00 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/10 17:24:28 by xueyang          ###   ########.fr       */
+/*   Updated: 2025/09/10 19:51:14 by xueyang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,14 @@
 static int	check_death(t_rules *r, int i)
 {
 	t_ms	now, last;
+	int     eating;
 
 	now = now_ms();
 	pthread_mutex_lock(&r->state_mtx);
 	last = r->philos[i].last_meal_ms;
 	pthread_mutex_unlock(&r->state_mtx);
-	if (now - last > r->t_die)
+	eating = r->philos[i].eating;
+	if (now - last > r->t_die && !eating)
 	{
 		pthread_mutex_lock(&r->print_mtx);
 		if (!r->stop)
@@ -30,8 +32,10 @@ static int	check_death(t_rules *r, int i)
 			r->stop = 1;
 			pthread_mutex_unlock(&r->state_mtx);
 		}
+		// fflush(stdout);
 		pthread_mutex_unlock(&r->print_mtx);
-		_exit(0);
+		// _exit(0);
+		set_stop(r, 1);
 		return (1);
 	}
 	return (0);

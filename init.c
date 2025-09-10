@@ -6,7 +6,7 @@
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/06 16:37:09 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/10 13:45:33 by xueyang          ###   ########.fr       */
+/*   Updated: 2025/09/10 19:49:30 by xueyang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,7 @@ int	init_entities(t_rules *r)
 		r->philos[i].meals = 0;
 		r->philos[i].last_meal_ms = 0;
 		r->philos[i].rules = r;
+		r->philos[i].eating = 0;
 		i++;
 	}
 	return (0);
