@@ -6,7 +6,7 @@
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/06 16:41:20 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/10 20:02:40 by xueyang          ###   ########.fr       */
+/*   Updated: 2025/09/10 20:11:08 by xueyang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,8 +61,12 @@ static void	count_meal(t_philo *p)
 static void	do_eat(t_philo *p)
 {
     mark_meal(p);
-	if (!log_status(p, ACT_EAT))
-		return ;
+    {
+        pthread_mutex_lock(&p->rules->state_mtx);
+        p->eating = 0;
+        pthread_mutex_unlock(&p->rules->state_mtx);
+        return;
+    }
 	msleep_intr(p->rules, p->rules->t_eat);
 	count_meal(p);
 }
@@ -202,7 +206,7 @@ void    *philo_routine(void *arg)
         release_slot(r);
         do_sleep_think(p);
 
-        usleep(80);
+        // usleep(80);
     }
     return (NULL);
 }
