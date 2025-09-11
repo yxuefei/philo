@@ -6,7 +6,7 @@
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/06 16:40:00 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/10 21:51:36 by xueyang          ###   ########.fr       */
+/*   Updated: 2025/09/10 23:02:06 by xueyang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ int	check_all_died(t_philo *philo)
 	{
 		if (ft_dead(&philo[i]))
 		{
-			ft_print_behav(philo[i].phi_id, "died", &philo[i]);
+			ft_print_actions(philo[i].phi_id, "died", &philo[i]);
 			pthread_mutex_lock(philo[0].dead_mtx);
 			*philo->dead_flg = 1;
 			pthread_mutex_unlock(philo[0].dead_mtx);

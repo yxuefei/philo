@@ -6,7 +6,7 @@
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 12:14:19 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/10 21:51:58 by xueyang          ###   ########.fr       */
+/*   Updated: 2025/09/10 22:25:13 by xueyang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,22 +32,22 @@ int	ft_check_digit(char **av)
 	return (0);
 }
 
-void	check_valid(char **av)
-{
-	if (ft_atoi(av[1]) <= 0 || ft_atoi(av[1]) >= MAX_CASE)
-		ft_error("Number of philo is invalid.\n");
-	if (ft_atoi(av[2]) <= 0)
-		ft_error("Time to die is invalid.\n");
-	if (ft_atoi(av[3]) <= 0)
-		ft_error("Time to eat is invalid.\n");
-	if (ft_atoi(av[4]) <= 0)
-		ft_error("Time to sleep is invalid.\n");
-	if (av[5])
-	{
-		if (ft_atoi(av[5]) <= 0)
-			ft_error("Number of meals is invalid.\n");
-	}
-}
+// void	check_valid(char **av)
+// {
+// 	if (ft_atoi(av[1]) <= 0 || ft_atoi(av[1]) >= MAX_CASE)
+// 		ft_error("Number of philo is invalid.\n");
+// 	if (ft_atoi(av[2]) <= 0)
+// 		ft_error("Time to die is invalid.\n");
+// 	if (ft_atoi(av[3]) <= 0)
+// 		ft_error("Time to eat is invalid.\n");
+// 	if (ft_atoi(av[4]) <= 0)
+// 		ft_error("Time to sleep is invalid.\n");
+// 	if (av[5])
+// 	{
+// 		if (ft_atoi(av[5]) <= 0)
+// 			ft_error("Number of meals is invalid.\n");
+// 	}
+// }
 
 int	ft_atoi(char *s)
 {

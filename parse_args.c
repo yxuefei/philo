@@ -6,13 +6,13 @@
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/06 16:36:02 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/10 21:43:00 by xueyang          ###   ########.fr       */
+/*   Updated: 2025/09/10 22:38:13 by xueyang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-void	parsing(t_philo *philo, char **av)
+void	init_param(t_philo *philo, char **av)
 {
 	philo->phi_nbr = ft_atoi(av[1]);
 	philo->time_die = ft_atoi(av[2]);

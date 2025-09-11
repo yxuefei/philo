@@ -6,7 +6,7 @@
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/06 16:37:09 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/10 21:52:57 by xueyang          ###   ########.fr       */
+/*   Updated: 2025/09/10 22:38:03 by xueyang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ void	data_init(t_philo *philo, t_data *data, pthread_mutex_t *forks,
 		philo[i].phi_id = i + 1;
 		philo[i].eating = 0;
 		philo[i].meal_nbr = 0;
-		parsing(&philo[i], av);
+		init_param(&philo[i], av);
 		philo[i].start_time = ft_gettime();
 		philo[i].last_meal_time = ft_gettime();
 		philo[i].print_mtx = &data->print_mtx;

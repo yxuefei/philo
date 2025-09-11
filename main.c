@@ -6,12 +6,13 @@
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 10:47:02 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/10 21:53:27 by xueyang          ###   ########.fr       */
+/*   Updated: 2025/09/11 00:53:29 by xueyang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
+//The monitor starts first
 int	ft_create_thread(t_data *data, pthread_mutex_t *forks)
 {
 	int			i;
@@ -22,7 +23,7 @@ int	ft_create_thread(t_data *data, pthread_mutex_t *forks)
 	i = 0;
 	while (i < data->philo[0].phi_nbr)
 	{
-		if (pthread_create(&data->philo[i].thread, NULL, &ft_thread_behav,
+		if (pthread_create(&data->philo[i].thread, NULL, &ft_thread_actions,
 				&data->philo[i]) != 0)
 			ft_clean(data, forks);
 		i++;
@@ -39,13 +40,14 @@ int	ft_create_thread(t_data *data, pthread_mutex_t *forks)
 	return (0);
 }
 
-void	*ft_thread_behav(void *val)
+//even id sleep first to avoid deadlock
+void	*ft_thread_actions(void *val)
 {
 	t_philo	*philo;
 
 	philo = (t_philo *)val;
 	if (philo->phi_id % 2 == 0)
-		ft_usleep(1);
+		ft_usleep(2);
 	while (!ft_finish(philo))
 	{
 		if (philo->phi_nbr == 1)
@@ -67,8 +69,9 @@ int	main(int ac, char **av)
 	if (ac != 5 && ac != 6)
 		ft_error("Invalid number of parameter.\n");
 	if (ft_check_digit(av))
-		ft_error("Input should be positive digits.\n");
-	check_valid(av);
+		ft_error("Input should be positive number.\n");
+	if (ft_atoi(av[1]) >= MAX_CASE)
+		ft_error("Too many philosophers.\n");
 	lock_init(philo, &data);
 	fork_init(forks, ft_atoi(av[1]));
 	data_init(philo, &data, forks, av);
