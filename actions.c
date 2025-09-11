@@ -6,12 +6,13 @@
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/06 16:41:20 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/11 01:57:40 by xueyang          ###   ########.fr       */
+/*   Updated: 2025/09/11 14:34:25 by xueyang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
+//%zu is for size_t
 void	ft_print_actions(int phi_id, char *s, t_philo *philo)
 {
 	size_t	tm;

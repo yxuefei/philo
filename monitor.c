@@ -6,7 +6,7 @@
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/06 16:40:00 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/10 23:02:06 by xueyang          ###   ########.fr       */
+/*   Updated: 2025/09/11 14:34:28 by xueyang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ void	*ft_monitor(void *val)
 	philo = (t_philo *)val;
 	while (1)
 	{
-		if (check_all_died(philo) || reach_min_meal(philo))
+		if (check_death(philo) || reach_min_meal(philo))
 			break ;
 	}
 	return (val);
@@ -50,7 +50,7 @@ int	ft_finish(t_philo *philo)
 	return (0);
 }
 
-int	check_all_died(t_philo *philo)
+int	check_death(t_philo *philo)
 {
 	int	i;
 

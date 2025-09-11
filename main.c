@@ -6,7 +6,7 @@
 /*   By: xueyang <xueyang@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/03 10:47:02 by xueyang           #+#    #+#             */
-/*   Updated: 2025/09/11 00:53:29 by xueyang          ###   ########.fr       */
+/*   Updated: 2025/09/11 14:20:38 by xueyang          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ void	*ft_thread_actions(void *val)
 
 	philo = (t_philo *)val;
 	if (philo->phi_id % 2 == 0)
-		ft_usleep(2);
+		ft_usleep(3);
 	while (!ft_finish(philo))
 	{
 		if (philo->phi_nbr == 1)
